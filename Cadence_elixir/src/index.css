@@ -1,0 +1,232 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #7B3FBC;
+  --color-accent-blue: #007BFF;
+  --color-accent-pink: #E0BBE4;
+  --color-accent-green: #4CAF50;
+  --border-color: #7b8ea2;
+  --text-light-primary: #000000;
+  --text-light-secondary: #000000;
+  --color-error: #E74C3C;
+  --color-warning: #FFD54F;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #FFFAFA; /* Alterado de var(--bg-dark-primary) para #FFFAFA */
+  color: var(--text-light-primary);
+  overflow-x: hidden;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Animações personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Estilos para botões */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary), #9B59B6);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(123, 63, 188, 0.3);
+}
+
+.btn-secondary {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+  border: 1px solid var(--border-color);
+  color: var(--text-light-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+  transform: translateY(-1px);
+}
+
+/* Estilos para cards */
+.card {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  border-color: var(--color-primary);
+}
+
+/* Estilos para inputs */
+.input {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+  border: 1px solid var(--border-color);
+  color: var(--text-light-primary);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(123, 63, 188, 0.1);
+}
+
+.input::placeholder {
+  color: var(--text-light-secondary);
+}
+
+/* Estilos para navbar */
+.navbar-item {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.navbar-item:hover {
+  background: rgba(123, 63, 188, 0.1);
+  transform: translateX(4px);
+}
+
+.navbar-item.active {
+  background: linear-gradient(135deg, var(--color-primary), #9B59B6);
+  color: white;
+}
+
+/* Estilos para avatares */
+.avatar {
+  border: 2px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+/* Estilos para status online */
+.status-online {
+  background: var(--color-accent-green);
+  border: 2px solid #FFFAFA; /* Alterado de var(--bg-dark-primary) para #FFFAFA */
+}
+
+/* Estilos para mensagens de chat */
+.chat-message {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.chat-message:hover {
+  background: var(--border-color);
+}
+
+.chat-message.own {
+  background: linear-gradient(135deg, var(--color-primary), #9B59B6);
+}
+
+/* Estilos para calendário */
+.calendar-day {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+}
+
+.calendar-day:hover {
+  background: rgba(123, 63, 188, 0.1);
+  transform: scale(1.05);
+}
+
+.calendar-day.today {
+  background: var(--color-primary);
+  color: white;
+}
+
+.calendar-day.has-event {
+  background: rgba(0, 123, 255, 0.2);
+  border: 1px solid var(--color-accent-blue);
+}
+
+/* Estilos para controles de reunião */
+.meeting-control {
+  background: #f9fafb; /* Removida variável --bg-dark-secondary */
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.meeting-control:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.meeting-control.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.meeting-control.danger {
+  background: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.meeting-control.danger:hover {
+  background: #C0392B;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .navbar-vertical {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar-vertical.open {
+    transform: translateX(0);
+  }
+}
