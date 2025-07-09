@@ -23,7 +23,8 @@ defmodule CadenceBackend.MixProject do
         :plug_cowboy,
         :phoenix,
         :ecto_sql,
-        :phoenix_live_view
+        :phoenix_live_view,
+        :phoenix_ecto # <--- GARANTA QUE ESTA LINHA ESTÁ AQUI
       ]
     ]
   end
@@ -34,7 +35,6 @@ defmodule CadenceBackend.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.7.21"},
-      # usa a versão mais recente da linha 0.x
       {:phoenix_live_view, "~> 0.20"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_html, "~> 3.3"},
@@ -50,7 +50,8 @@ defmodule CadenceBackend.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:ecto, "~> 3.11"},
       {:ecto_sql, "~> 3.11"},
-      {:ecto_sqlite3, "~> 0.14"} # <--- AQUI ESTÁ A ALTERAÇÃO PARA SQLite
+      {:ecto_sqlite3, "~> 0.14"},
+      {:phoenix_ecto, "~> 4.6"} # <--- GARANTA QUE ESTA LINHA ESTÁ AQUI COM A VERSÃO CORRETA
     ]
   end
 
