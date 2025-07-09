@@ -8,24 +8,26 @@ defmodule CadenceBackend.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Inicie o endpoint web do Phoenix. Esta é a entrada para o seu servidor HTTP.
-      CadenceBackendWeb.Endpoint,
+      # Inicie o seu repositório Ecto para gestão da base de dados.
+      CadenceBackend.Repo,
 
-      # Inicie o PubSub do Phoenix (se estiver a usar para tempo real/websockets).
+      # Inicie o Telemetry supervisor para métricas e eventos da aplicação.
+      # Essencial para ferramentas como o LiveDashboard.
+      CadenceBackendWeb.Telemetry,
+
+      # Inicie o PubSub do Phoenix, necessário para tempo real (Channels/WebSockets).
       {Phoenix.PubSub, name: CadenceBackend.PubSub},
 
-      # Inicie o seu repositório Ecto para gestão da base de dados.
-      CadenceBackend.Repo, # <--- UNCOMMENT THIS LINE!
+      # Inicie o endpoint web do Phoenix. Esta é a entrada para o seu servidor HTTP e WebSockets.
+      CadenceBackendWeb.Endpoint,
 
-      # O seu módulo Meetings, se ele for um processo Agent que precisa de iniciar com a app.
-      # Se ele for um Agent, certifique-se que start_link/0 ou start_link/1 está definido lá.
-      # Se tiver um supervisor para o contexto Meetings (recomendado para Apps maiores):
-      # CadenceBackend.Meetings.Supervisor,
-      # Se Meetings for diretamente o Agent:
-
+      # Inicie o rastreador de Presença do Phoenix.
+      # Ele usa o PubSub para gerenciar o estado online/offline dos usuários em canais.
+      CadenceBackend.PresenceTracker
     ]
 
     # Opções do supervisor: :one_for_one significa que se um processo falhar, só ele é reiniciado.
+    # Veja https://hexdocs.pm/elixir/Application.html para outras estratégias e opções suportadas
     opts = [strategy: :one_for_one, name: CadenceBackend.Supervisor]
     Supervisor.start_link(children, opts)
   end
