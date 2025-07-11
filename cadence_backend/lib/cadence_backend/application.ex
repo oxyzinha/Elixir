@@ -8,9 +8,6 @@ defmodule CadenceBackend.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Inicie o seu repositório Ecto para gestão da base de dados.
-      CadenceBackend.Repo,
-
       # Inicie o Telemetry supervisor para métricas e eventos da aplicação.
       # Essencial para ferramentas como o LiveDashboard.
       CadenceBackendWeb.Telemetry,
@@ -20,6 +17,9 @@ defmodule CadenceBackend.Application do
 
       # Inicie o endpoint web do Phoenix. Esta é a entrada para o seu servidor HTTP e WebSockets.
       CadenceBackendWeb.Endpoint,
+
+      # CORRIGIDO: Mover :conn_timeout para dentro de :conn_opts
+      {Finch, name: CadenceBackend.Finch, pools: %{default: [conn_opts: [timeout: 30_000]]}}, # <--- CORREÇÃO AQUI!
 
       # Inicie o rastreador de Presença do Phoenix.
       # Ele usa o PubSub para gerenciar o estado online/offline dos usuários em canais.

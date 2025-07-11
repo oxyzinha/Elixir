@@ -1,3 +1,4 @@
+# config/test.exs
 import Config
 
 # We don't run a server during test. If one is required,
@@ -17,4 +18,15 @@ config :swoosh, :api_client, false
 config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
-config :phoenix, :plug_init_mode, :runtime
+config :phoence, :plug_init_mode, :runtime
+
+# ====================================================================
+# CONFIGURAÇÕES DO FIREBASE (TESTE)
+# Para testes, podemos usar um ID de projeto mockado ou um projeto de teste separado.
+# No entanto, se você for fazer testes de integração que realmente batem no Firebase,
+# precisará de credenciais válidas. Para testes unitários, não é necessário.
+# ====================================================================
+config :cadence_backend, :firebase,
+  project_id: "test-firebase-project", # ID de projeto mock para testes
+  api_key: "mock-api-key",             # API Key mock para testes
+  database_type: :firestore

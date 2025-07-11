@@ -1,3 +1,4 @@
+# mix.exs
 defmodule CadenceBackend.MixProject do
   use Mix.Project
 
@@ -22,9 +23,7 @@ defmodule CadenceBackend.MixProject do
         :corsica,
         :plug_cowboy,
         :phoenix,
-        :ecto_sql,
-        :phoenix_live_view,
-        :phoenix_ecto # <--- GARANTA QUE ESTA LINHA ESTÁ AQUI
+        :phoenix_live_view
       ]
     ]
   end
@@ -34,34 +33,31 @@ defmodule CadenceBackend.MixProject do
 
   defp deps do
     [
-      {:phoenix, "~> 1.7.21"},
+      {:phoenix, "~> 1.7.0"},
       {:phoenix_live_view, "~> 0.20"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_html, "~> 3.3"},
       {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.13"},
+      {:finch, "~> 0.16"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
-      {:jason, "~> 1.2"},
+      {:jason, "~> 1.4"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:corsica, "~> 2.0"},
       {:plug_cowboy, "~> 2.5"},
-      {:ecto, "~> 3.11"},
-      {:ecto_sql, "~> 3.11"},
-      {:ecto_sqlite3, "~> 0.14"},
-      {:phoenix_ecto, "~> 4.6"} # <--- GARANTA QUE ESTA LINHA ESTÁ AQUI COM A VERSÃO CORRETA
+      {:hackney, "~> 1.18"},
+      {:ecto, "~> 3.10"},
+      {:phoenix_ecto, "~> 4.4"},
+      {:phoenix_pubsub, "~> 2.1"},
+      {:uuid, "~> 1.1"}
     ]
   end
 
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      "ecto.create_and_migrate": ["ecto.create", "ecto.migrate"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+      test: ["test"]
     ]
   end
 end
