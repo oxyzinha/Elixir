@@ -1,49 +1,47 @@
 # config/config.exs
-
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Config module.
-#
-# This configuration file is loaded before any dependency and
-# is restricted to this project.
-
-# General application configuration
 import Config
 
-config :cadence_backend,
-  generators: [timestamp_type: :utc_datetime],
-  # --- ADICIONE ESTA LINHA AQUI ---
-  ecto_repos: [CadenceBackend.Repo] # <--- ESTA LINHA É A ADIÇÃO NECESSÁRIA
-  # --- FIM DA ADIÇÃO ---
-
-
-# Configures the endpoint
+# Configuração da sua aplicação e do endpoint Phoenix
 config :cadence_backend, CadenceBackendWeb.Endpoint,
-  url: [host: "localhost"],
-  adapter: Bandit.PhoenixAdapter,
-  render_errors: [
-    formats: [json: CadenceBackendWeb.ErrorJSON],
-    layout: false
-  ],
-  pubsub_server: CadenceBackend.PubSub,
-  live_view: [signing_salt: "L/7vT5Zl"]
+  url: [host: "localhost", port: 4000],
+  render_errors: [view: CadenceBackendWeb.ErrorView, accepts: ~w(html json), layout: false],
+  pubsub_extra_applications: [:phoenix_pubsub],
+  live_view: [signing_salt: "YOUR_LIVE_VIEW_SALT"] # Substitua por um valor real em produção
 
-# Configures the mailer
-#
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
-#
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :cadence_backend, CadenceBackend.Mailer, adapter: Swoosh.Adapters.Local
+# Configurações do mailer (Swoosh)
+config :cadence_backend, CadenceBackend.Mailer,
+  adapter: Swoosh.Adapters.Local
 
-# Configures Elixir's Logger
+config :swoosh, :api_client, Swoosh.ApiClient.Hackney
+
+# REMOVIDO: A configuração duplicada do Firebase que estava aqui.
+# A configuração do Firebase agora será definida em cada ambiente.
+
+config :cadence_backend, CadenceBackendWeb.Endpoint,
+  pubsub_server: CadenceBackend.PubSub
+
+# Configurações do logger
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
+  format: "[$level] $message\n",
   metadata: [:request_id]
 
-# Use Jason for JSON parsing in Phoenix
-config :phoenix, :json_library, Jason
+# Configurações de tempo para plug_init_mode
+config :phoenix, :plug_init_mode, :runtime
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
+# Configuração do Finch para requisições HTTP (usado para Firebase)
+# Mantenha a configuração do Finch aqui, se desejar um padrão global para o pool.
+# O conn_timeout específico será definido no application.ex.
+config :finch, name: CadenceBackend.Finch, pools: %{
+  :default => [size: 20]
+}
+
+# Configuração global para Jason
+config :jason,
+  library: Jason,
+  encode: [
+    pretty: true,
+    # Você pode adicionar mais opções aqui se precisar de controle fino
+  ]
+
+# Importa as configurações específicas do ambiente (dev, test, prod)
 import_config "#{config_env()}.exs"

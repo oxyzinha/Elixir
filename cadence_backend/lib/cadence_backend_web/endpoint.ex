@@ -1,5 +1,6 @@
 defmodule CadenceBackendWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :cadence_backend
+  use Phoenix.Endpoint, otp_app: :cadence_backend,
+   pubsub_server: CadenceBackend.PubSub
 
   @session_options [
     store: :cookie,
@@ -59,6 +60,10 @@ defmodule CadenceBackendWeb.Endpoint do
       connect_info: [:peer_data, :x_headers, session: @session_options, user_id: :user_id, token: :token]
     ],
     longpoll: [connect_info: [session: @session_options, user_id: :user_id, token: :token]]
+
+ socket "/socket", CadenceBackendWeb.UserSocket,
+    websocket: true,
+    longpoll: false
 
   # Configuração para o Phoenix LiveView (se você estiver usando LiveView)
   # Mantenha se você usa LiveView, caso contrário, pode remover este bloco.

@@ -42,8 +42,6 @@ const ParticipantItem = ({ participant, delay }) => (
 const ParticipantsPanel = ({ activeTab, onTabClick }) => {
   const tabs = [
     { id: 'participants', icon: Users, label: 'Participantes' },
-    { id: 'documents', icon: FileText, label: 'Documentos' },
-    { id: 'code', icon: Code, label: 'Código' }
   ];
 
   return (

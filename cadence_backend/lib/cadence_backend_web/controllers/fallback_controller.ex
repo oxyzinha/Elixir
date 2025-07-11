@@ -22,17 +22,10 @@ defmodule CadenceBackendWeb.FallbackController do
     |> render(:"403")
   end
 
-  def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
+  def call(conn, {:error, reason}) do
     conn
-    |> put_status(:unprocessable_entity)
+    |> put_status(:bad_request)
     |> put_view(json: CadenceBackendWeb.ChangesetView)
-    |> render("error.json", changeset: changeset)
-  end
-
-  def call(conn, {:error, _reason}) do
-    conn
-    |> put_status(:internal_server_error)
-    |> put_view(json: CadenceBackendWeb.ErrorView)
-    |> render(:"500")
+    |> render("error.json", reason: reason)
   end
 end

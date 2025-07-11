@@ -1,3 +1,4 @@
+# config/prod.exs
 import Config
 
 # Configures Swoosh API Client
