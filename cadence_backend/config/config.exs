@@ -14,9 +14,6 @@ config :cadence_backend, CadenceBackend.Mailer,
 
 config :swoosh, :api_client, Swoosh.ApiClient.Hackney
 
-# REMOVIDO: A configuração duplicada do Firebase que estava aqui.
-# A configuração do Firebase agora será definida em cada ambiente.
-
 config :cadence_backend, CadenceBackendWeb.Endpoint,
   pubsub_server: CadenceBackend.PubSub
 
@@ -29,7 +26,6 @@ config :logger, :console,
 config :phoenix, :plug_init_mode, :runtime
 
 # Configuração do Finch para requisições HTTP (usado para Firebase)
-# Mantenha a configuração do Finch aqui, se desejar um padrão global para o pool.
 # O conn_timeout específico será definido no application.ex.
 config :finch, name: CadenceBackend.Finch, pools: %{
   :default => [size: 20]
@@ -39,8 +35,7 @@ config :finch, name: CadenceBackend.Finch, pools: %{
 config :jason,
   library: Jason,
   encode: [
-    pretty: true,
-    # Você pode adicionar mais opções aqui se precisar de controle fino
+    pretty: true
   ]
 
 # Importa as configurações específicas do ambiente (dev, test, prod)

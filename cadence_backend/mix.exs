@@ -1,4 +1,3 @@
-# mix.exs
 defmodule CadenceBackend.MixProject do
   use Mix.Project
 
@@ -24,6 +23,7 @@ defmodule CadenceBackend.MixProject do
         :plug_cowboy,
         :phoenix,
         :phoenix_live_view
+        # REMOVIDO: :goth - Não estamos a usar Goth com a sua implementação atual
       ]
     ]
   end
@@ -38,7 +38,7 @@ defmodule CadenceBackend.MixProject do
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_html, "~> 3.3"},
       {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.16"},
+      {:finch, "~> 0.18"}, # Versão atualizada ou compatível
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
@@ -52,6 +52,7 @@ defmodule CadenceBackend.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_pubsub, "~> 2.1"},
       {:uuid, "~> 1.1"}
+      # REMOVIDO: {:goth, "~> 1.4"} - Não estamos a usar Goth
     ]
   end
 

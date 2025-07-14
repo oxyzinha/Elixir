@@ -9,22 +9,22 @@ config :cadence_backend, CadenceBackendWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   esbuild: [
-      args: [
-    "--external:/fonts/*",
-    "--external:/images/*",
-    "--external:/css/*",
-    "--loader:.js=jsx",
-    "--loader:.ts=tsx",
-    "--target=es2017",
-    "--platform=browser",
-    "--format=esm",
-    "--define:process.env.NODE_ENV=\"development\"",
-    "--watch=forever",
-    "--sourcemap=inline",
-    "--outdir=../priv/static/assets"
-  ],
-  cd: Path.expand("../assets", __DIR__)
-]
+    args: [
+      "--external:/fonts/*",
+      "--external:/images/*",
+      "--external:/css/*",
+      "--loader:.js=jsx",
+      "--loader:.ts=tsx",
+      "--target=es2017",
+      "--platform=browser",
+      "--format=esm",
+      "--define:process.env.NODE_ENV=\"development\"",
+      "--watch=forever",
+      "--sourcemap=inline",
+      "--outdir=../priv/static/assets"
+    ],
+    cd: Path.expand("../assets", __DIR__)
+  ]
 
 # ## SSL Support (comentado)
 # ...
@@ -44,9 +44,9 @@ config :phoenix,
 
 # ====================================================================
 # CONFIGURAÇÕES DO FIREBASE (DESENVOLVIMENTO)
-# Usar a chave aninhada :firebase para consistência.
 # ====================================================================
 config :cadence_backend, :firebase,
-  project_id: "estagio-cb19d", # SEU Project ID REAL
-  api_key: "AIzaSyCUtuu04u21-DXFClcmr5_mt9wVs44jds0", # SUA API Key REAL
+  project_id: "estagio-cb19d", # Seu Project ID real
+  api_key: "AIzaSyCutuu04u21-DXFC1cmr5_mt9Ws44jds0", # <--- CHAVE DE API DEFINIDA DIRETAMENTE AQUI
   database_type: :firestore
+# REMOVIDO: Nenhuma configuração para Goth, pois não estamos usando-o com API Key
