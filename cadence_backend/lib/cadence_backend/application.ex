@@ -18,8 +18,11 @@ defmodule CadenceBackend.Application do
       # Inicie o endpoint web do Phoenix. Esta é a entrada para o seu servidor HTTP e WebSockets.
       CadenceBackendWeb.Endpoint,
 
-      # CORRIGIDO: Mover :conn_timeout para dentro de :conn_opts
-      {Finch, name: CadenceBackend.Finch, pools: %{default: [conn_opts: [timeout: 30_000]]}}, # <--- CORREÇÃO AQUI!
+      # MANTIDO: Inicia o Finch. As configurações de pools estão em config/config.exs.
+      {Finch, name: CadenceBackend.Finch},
+
+      # REMOVIDO: Goth - Não estamos a usar Goth com a sua implementação de Firebase
+      # Goth,
 
       # Inicie o rastreador de Presença do Phoenix.
       # Ele usa o PubSub para gerenciar o estado online/offline dos usuários em canais.

@@ -5,18 +5,21 @@ defmodule CadenceBackend.Meetings.Meeting do
   """
   require Logger
 
+  # ADICIONE ESTA LINHA AQUI!
+  @derive {Jason.Encoder, except: [:__struct__]}
+
   # Define os campos da struct com seus tipos Elixir esperados
   defstruct [
-    :id,           # String (UUID)
-    :name,         # String
-    :start_time,   # DateTime.t
-    :end_time,     # DateTime.t
-    :status,       # String
-    :type,         # String
-    :owner_id,     # String
-    :participants, # List de mapas (e.g., [%{"id" => "user1", "name" => "User A"}])
-    :inserted_at,  # DateTime.t
-    :updated_at    # DateTime.t
+    :id,            # String (UUID)
+    :name,          # String
+    :start_time,    # DateTime.t
+    :end_time,      # DateTime.t
+    :status,        # String
+    :type,          # String
+    :owner_id,      # String
+    :participants,  # List de mapas (e.g., [%{"id" => "user1", "name" => "User A"}])
+    :inserted_at,   # DateTime.t
+    :updated_at     # DateTime.t
   ]
 
   @doc """

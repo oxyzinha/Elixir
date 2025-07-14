@@ -4,8 +4,9 @@ defmodule CadenceBackendWeb.MeetingController do
   alias CadenceBackend.Meetings
   alias CadenceBackend.Meetings.Meeting
   require Logger
-  require DateTime
-  require NaiveDateTime
+  # Não precisa mais de require DateTime e NaiveDateTime aqui, se Jason lidar com isso
+  # require DateTime # << Pode remover
+  # require NaiveDateTime # << Pode remover
 
   # GET /api/meetings
   def index(conn, _params) do
@@ -13,8 +14,12 @@ defmodule CadenceBackendWeb.MeetingController do
       {:ok, meetings} ->
         # DEBUG: Inspeciona a lista de meetings ANTES de mapear para JSON
         IO.inspect(meetings, label: "DEBUG: Meetings recebidas do Meetings.list_all_meetings()")
-        meetings_json = Enum.map(meetings, &meeting_to_json_map/1)
-        json(conn, %{meetings: meetings_json})
+        # AQUI A ALTERAÇÃO CRÍTICA:
+        # Não precisamos mais de `Enum.map(meetings, &meeting_to_json_map/1)`
+        # se o Jason já sabe como serializar a struct Meeting (implica um Jason.Encoder para Meeting)
+        # OU se a struct Meeting contém apenas tipos que Jason já sabe serializar
+        # (como strings, números, booleans, listas, mapas e DateTime.t)
+        json(conn, %{meetings: meetings}) # <<< Tentar enviar as structs diretamente!
       {:error, reason} ->
         Logger.error("MeetingController", "Falha ao buscar reuniões: #{inspect(reason)}")
         conn
@@ -28,7 +33,7 @@ defmodule CadenceBackendWeb.MeetingController do
       {:ok, %Meeting{} = meeting} ->
         conn
         |> put_status(:created)
-        |> json(%{meeting: meeting_to_json_map(meeting)})
+        |> json(%{meeting: meeting}) # <<< Tentar enviar a struct diretamente!
       {:error, reason} ->
         Logger.error("MeetingController", "Falha ao criar reunião: #{inspect(reason)}")
         case reason do
@@ -45,7 +50,7 @@ defmodule CadenceBackendWeb.MeetingController do
   def show(conn, %{"id" => id}) do
     case Meetings.get_meeting(id) do
       {:ok, %Meeting{} = meeting} ->
-        json(conn, %{meeting: meeting_to_json_map(meeting)})
+        json(conn, %{meeting: meeting}) # <<< Tentar enviar a struct diretamente!
       {:error, {:api_error, "Not found", 404, _}} ->
         send_resp(conn, 404, "Não Encontrado")
       {:error, reason} ->
@@ -61,7 +66,7 @@ defmodule CadenceBackendWeb.MeetingController do
       {:ok, meeting} ->
         case Meetings.update_meeting(meeting, meeting_params) do
           {:ok, %Meeting{} = updated_meeting} ->
-            json(conn, %{meeting: meeting_to_json_map(updated_meeting)})
+            json(conn, %{meeting: updated_meeting}) # <<< Tentar enviar a struct diretamente!
           {:error, reason} ->
             Logger.error("MeetingController", "Falha ao atualizar reunião (ID: #{id}): #{inspect(reason)}")
             case reason do
@@ -105,48 +110,12 @@ defmodule CadenceBackendWeb.MeetingController do
     end
   end
 
-  # FUNÇÃO AUXILIAR PARA FORMATAR DATAS COM IO.inspect PARA DEBUGAR
-  # Esta função usa múltiplos function clauses para lidar com os tipos de forma explícita.
-  # Isso garante que DateTime.to_iso8601/2 só seja chamado com os argumentos corretos.
+  # REMOVER COMPLETAMENTE esta função, pois `@derive Jason.Encoder` no Meeting.ex
+  # torna-a desnecessária. Não faz sentido mantê-la se não for usada e não tem
+  # uma lógica de transformação específica que Jason não faça.
+  # defp meeting_to_json_map(%CadenceBackend.Meetings.Meeting{} = meeting) do
+  #   Map.from_struct(meeting)
+  #   |> Map.drop([:__struct__])
+  # end
 
-  defp format_datetime_for_json(%DateTime{} = datetime_struct) do
-    IO.inspect(datetime_struct, label: "DEBUG: format_datetime_for_json - DateTime input")
-    DateTime.to_iso8601(datetime_struct, :microsecond)
-  end
-
-  defp format_datetime_for_json(%NaiveDateTime{} = naive_datetime_struct) do
-    IO.inspect(naive_datetime_struct, label: "DEBUG: format_datetime_for_json - NaiveDateTime input")
-    # Se for uma NaiveDateTime, primeiro converte para DateTime e depois formata.
-    # Assumimos UTC para a conversão de NaiveDateTime para DateTime.
-    DateTime.from_naive!(naive_datetime_struct, "Etc/UTC")
-    |> DateTime.to_iso8601(:microsecond)
-  end
-
-  defp format_datetime_for_json(nil) do
-    IO.inspect(nil, label: "DEBUG: format_datetime_for_json - Nil input")
-    nil # Lida explicitamente com nil
-  end
-
-  defp format_datetime_for_json(other) do
-    IO.inspect(other, label: "DEBUG: format_datetime_for_json - Other input (Unexpected Type!)")
-    Logger.warning("MeetingController", "format_datetime_for_json recebeu um tipo inesperado: #{inspect(other)}. Retornando nil.")
-    nil
-  end
-
-  # Converte a struct Meeting para um mapa JSON adequado para a resposta da API.
-  # Garante que os campos de data/hora são formatados como strings ISO 8601 usando a função auxiliar.
-  defp meeting_to_json_map(%CadenceBackend.Meetings.Meeting{} = meeting) do
-    %{
-      id: meeting.id,
-      name: meeting.name,
-      start_time: format_datetime_for_json(meeting.start_time),
-      end_time: format_datetime_for_json(meeting.end_time),
-      status: meeting.status,
-      type: meeting.type,
-      owner_id: meeting.owner_id, # CORRIGIDO: owner_id NÃO é uma data, não formatar
-      participants: meeting.participants,
-      inserted_at: format_datetime_for_json(meeting.inserted_at),
-      updated_at: format_datetime_for_json(meeting.updated_at)
-    }
-  end
 end
