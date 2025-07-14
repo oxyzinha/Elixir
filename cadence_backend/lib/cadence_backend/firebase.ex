@@ -10,6 +10,8 @@ defmodule CadenceBackend.Firebase do
   """
 
   require Logger
+  alias Finch.Build # Adicionei aqui, caso você não tivesse
+  alias Jason # Adicionei aqui, caso você não tivesse
 
   # @project_id precisa ser configurado em config/config.exs ou env.
   @project_id Application.compile_env(:cadence_backend, [:firebase, :project_id], nil)
@@ -37,9 +39,10 @@ defmodule CadenceBackend.Firebase do
   Retorna `{:ok, document}` se sucesso, `{:error, reason}` caso contrário.
   """
   # Sempre POST para que o Firestore gere o ID.
-  def create_document(collection, data, _id \\ nil) do
+  def create_document(collection, data, id \\ nil) do # <<-- Corrigido para _id para id (se for usado)
     IO.puts "FIREBASE DEBUG: Entering create_document for collection: #{collection}"
-    url = "#{base_url()}/#{collection}?key=#{@api_key}"
+    url = "#{base_url()}/#{collection}"
+    url = if id, do: "#{url}?documentId=#{id}&key=#{@api_key}", else: "#{url}?key=#{@api_key}" # Adicionado id na URL se fornecido, e api_key
     method = :post # Sempre POST para criação
 
     # Convertendo o mapa de dados para o formato de campos do Firestore
@@ -51,6 +54,7 @@ defmodule CadenceBackend.Firebase do
     |> Finch.request(CadenceBackend.Finch)
     |> handle_response(:create)
   end
+
 
   @doc """
   Lê um documento específico de uma coleção pelo ID.
@@ -74,15 +78,15 @@ defmodule CadenceBackend.Firebase do
   Para uso em produção com muitas entradas, Firestore queries são mais eficientes.
   """
   def list_documents(collection) do
-    IO.puts "FIREBASE DEBUG: Entering list_documents for collection: #{collection}" # ESTA LINHA DEVE APARECER!
+    IO.puts "FIREBASE DEBUG: Entering list_documents for collection: #{collection}"
     url = "#{base_url()}/#{collection}?key=#{@api_key}"
 
-    IO.inspect({:get, url}, label: "FIREBASE DEBUG: Finch Request for list_documents") # E ESTA TAMBÉM!
+    IO.inspect({:get, url}, label: "FIREBASE DEBUG: Finch Request for list_documents")
 
     response = Finch.build(:get, url)
     |> Finch.request(CadenceBackend.Finch)
 
-    IO.inspect(response, label: "FIREBASE DEBUG: Raw Finch Response before handle_response") # ESTA É CRÍTICA!
+    IO.inspect(response, label: "FIREBASE DEBUG: Raw Finch Response before handle_response")
 
     handle_response(response, :list)
   end
@@ -179,7 +183,7 @@ defmodule CadenceBackend.Firebase do
           if operation == :list do
             {:ok, decode_list_response(decoded_response)}
           else
-            {:ok, firestore_fields_to_map(decoded_response)}
+            {:ok, firestore_fields_to_map(decoded_response)} # <<-- CHAMADA PARA FUNÇÃO AGORA PÚBLICA
           end
         {:error, reason} ->
           Logger.error("Firebase_JSON_Decode", "Falha ao decodificar JSON para #{operation}: #{inspect(reason)}. Corpo: #{response_body}")
@@ -215,8 +219,11 @@ defmodule CadenceBackend.Firebase do
     {:error, reason}
   end
 
-  # Converte o formato de fields do Firestore de volta para um mapa Elixir (para download)
-  defp firestore_fields_to_map(%{"fields" => fields, "name" => name, "createTime" => create_time, "updateTime" => update_time}) do
+  @doc """
+  Converte o formato de 'fields' do Firestore de volta para um mapa Elixir (para download).
+  Esta função é pública porque Meetings.ex precisa dela.
+  """
+  def firestore_fields_to_map(%{"fields" => fields, "name" => name, "createTime" => create_time, "updateTime" => update_time}) do
     id = name |> String.split("/") |> List.last()
     data_map = Enum.reduce(fields, %{}, fn {key, value}, acc ->
       Map.put(acc, String.to_atom(key), firestore_value_to_elixir(value))
@@ -227,9 +234,11 @@ defmodule CadenceBackend.Firebase do
       updated_at: parse_datetime_from_iso8601(update_time)
     })
   end
-  defp firestore_fields_to_map(other) do
+  # Sobrecarga para lidar com casos em que o input não é o formato completo de documento do Firestore
+  def firestore_fields_to_map(other) do
     IO.inspect(other, label: "FIREBASE DEBUG: firestore_fields_to_map received unexpected input")
     if is_map(other) do
+      # Trata o caso em que a resposta não é um documento completo com 'fields', mas um mapa direto (e.g., de uma sub-coleção)
       Enum.reduce(other, %{}, fn {key, value}, acc ->
         Map.put(acc, String.to_atom(key), firestore_value_to_elixir(value))
       end)
@@ -276,9 +285,10 @@ defmodule CadenceBackend.Firebase do
   # Decodifica a resposta da lista de documentos (vários documentos)
   defp decode_list_response(%{"documents" => documents}) when is_list(documents) do
     IO.inspect(documents, label: "FIREBASE DEBUG: decode_list_response - raw documents list")
+    # Chama a função pública firestore_fields_to_map/1
     Enum.map(documents, &firestore_fields_to_map/1)
   end
-  defp decode_list_response(other) do # Corrigido de _other para other para remover warning
+  defp decode_list_response(other) do
     IO.inspect(other, label: "FIREBASE DEBUG: decode_list_response - unexpected input, returning empty list")
     []
   end
