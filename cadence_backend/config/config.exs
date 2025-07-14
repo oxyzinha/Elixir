@@ -1,3 +1,10 @@
+# Configuração do Guardian para autenticação JWT
+import Config
+
+config :cadence_backend, CadenceBackend.Guardian,
+  issuer: "cadence_backend",
+  secret_key: "SUA_CHAVE_SECRETA_AQUI_TROQUE_PARA_PRODUCAO"
+
 # config/config.exs
 import Config
 

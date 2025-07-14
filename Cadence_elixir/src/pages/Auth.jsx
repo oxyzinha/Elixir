@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { loginUser, registerUser } from '@/lib/authContext';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -12,14 +13,70 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleAuthAction = (e) => {
+  const [loginError, setLoginError] = useState(null);
+
+  const handleAuthAction = async (e) => {
     e.preventDefault();
-    toast({
-      title: `A ${isLogin ? 'entrar' : 'registar'}...`,
-      description: "A redirecionar para o dashboard.",
-      duration: 2000,
-    });
-    setTimeout(() => navigate('/dashboard'), 2000);
+    setLoginError(null);
+    if (isLogin) {
+      // Login JWT
+      const form = e.target;
+      const email = form.email.value;
+      const password = form.password.value;
+      try {
+        await loginUser(email, password);
+        toast({
+          title: 'Login realizado com sucesso!',
+          description: 'Redirecionando para o dashboard...',
+          duration: 1500,
+        });
+        setTimeout(() => navigate('/dashboard'), 1500);
+      } catch (err) {
+        setLoginError('Usuário ou senha inválidos');
+        toast({
+          title: 'Erro ao fazer login',
+          description: 'Usuário ou senha inválidos',
+          duration: 2500,
+          variant: 'destructive',
+        });
+      }
+    } else {
+      // Registro
+      const form = e.target;
+      const username = form.username.value;
+      const email = form.email.value;
+      const password = form.password.value;
+      const confirmPassword = form["confirm-password"].value;
+      if (password !== confirmPassword) {
+        setLoginError('As senhas não coincidem');
+        toast({
+          title: 'Erro ao registrar',
+          description: 'As senhas não coincidem',
+          duration: 2500,
+          variant: 'destructive',
+        });
+        return;
+      }
+      try {
+        await registerUser(username, email, password);
+        toast({
+          title: 'Registro realizado com sucesso!',
+          description: 'Você já pode fazer login.',
+          duration: 2000,
+        });
+        setTimeout(() => {
+          setIsLogin(true);
+        }, 2000);
+      } catch (err) {
+        setLoginError('Erro ao registrar usuário');
+        toast({
+          title: 'Erro ao registrar',
+          description: err?.message || 'Não foi possível registrar o usuário',
+          duration: 2500,
+          variant: 'destructive',
+        });
+      }
+    }
   };
 
   const toggleForm = () => setIsLogin(!isLogin);
@@ -89,6 +146,7 @@ const Auth = () => {
                       <Input id="password-login" name="password" type="password" required placeholder="Password" className="pl-10" />
                     </div>
                   </div>
+                  {loginError && <div className="text-red-500 text-sm mb-2">{loginError}</div>}
                   <div className="flex items-center justify-end">
                     <a href="#" className="text-sm font-medium transition-colors" style={{ color: 'var(--text-light-secondary)' }} hover={{ color: 'var(--color-primary)' }}>
                       Esqueceu a password?

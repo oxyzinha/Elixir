@@ -15,7 +15,6 @@ import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 
 function App() {
-  // Já não precisas de lógica complexa de layout aqui
   return (
     <>
       <Helmet>

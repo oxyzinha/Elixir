@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '@/lib/authContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Bell, HelpCircle, ChevronDown } from 'lucide-react';
@@ -34,6 +35,8 @@ const Header = () => {
     });
     setTimeout(() => navigate('/auth'), 1500);
   }
+
+  const { user } = useAuth();
 
   return (
     <motion.header
@@ -107,15 +110,13 @@ const Header = () => {
               style={{ color: 'var(--text-light-primary)' }}
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder-avatar.jpg" alt="Utilizador" />
-                <AvatarFallback>JS</AvatarFallback>
+                <AvatarImage src={user?.avatar_url || "/placeholder-avatar.jpg"} alt={user?.name || "Utilizador"} />
+                <AvatarFallback>{user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}</AvatarFallback>
               </Avatar>
               <div className="text-left hidden md:block">
-                <div className="text-sm font-medium">João Silva</div>
+                <div className="text-sm font-medium">{user?.name || 'Usuário'}</div>
                 <div className="flex items-center space-x-1">
-                  <div 
-                    className="w-2 h-2 rounded-full status-online"
-                  ></div>
+                  <div className="w-2 h-2 rounded-full status-online"></div>
                   <span className="text-xs" style={{ color: 'var(--text-light-secondary)' }}>
                     Online
                   </span>
