@@ -46,6 +46,7 @@ defmodule CadenceBackend.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:corsica, "~> 2.0"},
+      {:guardian, "~> 2.0"},
       {:plug_cowboy, "~> 2.5"},
       {:hackney, "~> 1.18"},
       {:ecto, "~> 3.10"},

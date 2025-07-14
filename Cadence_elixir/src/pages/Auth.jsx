@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { loginUser } from '@/lib/authContext';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -12,14 +13,41 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleAuthAction = (e) => {
+  const [loginError, setLoginError] = useState(null);
+
+  const handleAuthAction = async (e) => {
     e.preventDefault();
-    toast({
-      title: `A ${isLogin ? 'entrar' : 'registar'}...`,
-      description: "A redirecionar para o dashboard.",
-      duration: 2000,
-    });
-    setTimeout(() => navigate('/dashboard'), 2000);
+    setLoginError(null);
+    if (isLogin) {
+      // Login JWT
+      const form = e.target;
+      const email = form.email.value;
+      const password = form.password.value;
+      try {
+        await loginUser(email, password);
+        toast({
+          title: 'Login realizado com sucesso!',
+          description: 'Redirecionando para o dashboard...',
+          duration: 1500,
+        });
+        setTimeout(() => navigate('/dashboard'), 1500);
+      } catch (err) {
+        setLoginError('Usuário ou senha inválidos');
+        toast({
+          title: 'Erro ao fazer login',
+          description: 'Usuário ou senha inválidos',
+          duration: 2500,
+          variant: 'destructive',
+        });
+      }
+    } else {
+      // Registro (mantém comportamento antigo)
+      toast({
+        title: 'Registrando...',
+        description: 'Funcionalidade de registro não implementada.',
+        duration: 2000,
+      });
+    }
   };
 
   const toggleForm = () => setIsLogin(!isLogin);
@@ -89,6 +117,7 @@ const Auth = () => {
                       <Input id="password-login" name="password" type="password" required placeholder="Password" className="pl-10" />
                     </div>
                   </div>
+                  {loginError && <div className="text-red-500 text-sm mb-2">{loginError}</div>}
                   <div className="flex items-center justify-end">
                     <a href="#" className="text-sm font-medium transition-colors" style={{ color: 'var(--text-light-secondary)' }} hover={{ color: 'var(--color-primary)' }}>
                       Esqueceu a password?

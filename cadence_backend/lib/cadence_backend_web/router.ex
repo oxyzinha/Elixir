@@ -8,11 +8,11 @@ defmodule CadenceBackendWeb.Router do
     plug :accepts, ["json"]
 
     plug Plug.Parsers,
-      parsers: [:json],
-      pass: ["application/json"],
-      json_decoder: Phoenix.json_library()
+     parsers: [:urlencoded, :multipart, :json],
+     pass: ["*/*"],
+     json_decoder: Phoenix.json_library()
 
-    plug CadenceBackendWeb.AuthPlug
+    plug CadenceBackendWeb.JWTAuthPlug
     plug :put_current_user
   end
 
@@ -30,9 +30,20 @@ defmodule CadenceBackendWeb.Router do
 
   scope "/api", CadenceBackendWeb do
     pipe_through :api
+
+    post "/login", AuthController, :login
     get "/meetings", MeetingController, :index
     post "/meetings", MeetingController, :create
     get "/meetings/:id", MeetingController, :show
+
+
+    # Endpoint para dados do usuário autenticado
+    get "/me", ApiController, :me
+    put "/me", ApiController, :update_me
+
+    # Endpoints de conversas
+    get "/conversations", ConversationController, :index
+    post "/conversations", ConversationController, :create
   end
 
   if Application.compile_env(:cadence_backend, :dev_routes) do
@@ -51,4 +62,5 @@ defmodule CadenceBackendWeb.Router do
       conn
     end
   end
+  
 end

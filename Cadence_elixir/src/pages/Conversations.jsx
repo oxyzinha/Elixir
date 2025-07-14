@@ -2,13 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import Navbar from '@/components/layout/Navbar';
 import Header from '@/components/layout/Header';
+import { fetchMessages, sendMessage } from '@/services/conversations';
 
 const Conversations = () => {
-  const [messages, setMessages] = useState([
-    { id: 1, from: 'agent', text: 'Olá, preciso de ajuda com a minha conta.' },
-    { id: 2, from: 'user', text: 'Claro! Como posso ajudar?' },
-    { id: 3, from: 'agent', text: 'Não consigo redefinir a palavra-passe.' },
-  ]);
+  const [messages, setMessages] = useState([]);
+  // Carrega mensagens do backend ao montar
+  useEffect(() => {
+    async function loadMessages() {
+      try {
+        const msgs = await fetchMessages();
+        setMessages(msgs);
+      } catch (err) {
+        setMessages([]);
+      }
+    }
+    loadMessages();
+  }, []);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -33,14 +42,16 @@ const Conversations = () => {
     return () => clearTimeout(typingTimeout);
   }, [newMessage]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!newMessage.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), from: 'user', text: newMessage.trim() },
-    ]);
-    setNewMessage('');
-    setIsTyping(false);
+    try {
+      const msg = await sendMessage(newMessage.trim());
+      setMessages((prev) => [...prev, msg]);
+      setNewMessage('');
+      setIsTyping(false);
+    } catch (err) {
+      // Trate o erro conforme necessário
+    }
   };
 
   const handleKeyDown = (e) => {
