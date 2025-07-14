@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginUser } from '@/lib/authContext';
+import { loginUser, registerUser } from '@/lib/authContext';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -41,12 +41,41 @@ const Auth = () => {
         });
       }
     } else {
-      // Registro (mantém comportamento antigo)
-      toast({
-        title: 'Registrando...',
-        description: 'Funcionalidade de registro não implementada.',
-        duration: 2000,
-      });
+      // Registro
+      const form = e.target;
+      const username = form.username.value;
+      const email = form.email.value;
+      const password = form.password.value;
+      const confirmPassword = form["confirm-password"].value;
+      if (password !== confirmPassword) {
+        setLoginError('As senhas não coincidem');
+        toast({
+          title: 'Erro ao registrar',
+          description: 'As senhas não coincidem',
+          duration: 2500,
+          variant: 'destructive',
+        });
+        return;
+      }
+      try {
+        await registerUser(username, email, password);
+        toast({
+          title: 'Registro realizado com sucesso!',
+          description: 'Você já pode fazer login.',
+          duration: 2000,
+        });
+        setTimeout(() => {
+          setIsLogin(true);
+        }, 2000);
+      } catch (err) {
+        setLoginError('Erro ao registrar usuário');
+        toast({
+          title: 'Erro ao registrar',
+          description: err?.message || 'Não foi possível registrar o usuário',
+          duration: 2500,
+          variant: 'destructive',
+        });
+      }
     }
   };
 

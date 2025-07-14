@@ -1,3 +1,14 @@
+// Função de registro de usuário
+export async function registerUser(username, email, password) {
+  const response = await apiFetch('/api/register', {
+    method: 'POST',
+    body: JSON.stringify({ username, email, password }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response;
+}
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { apiFetch } from '@/services/api';
 

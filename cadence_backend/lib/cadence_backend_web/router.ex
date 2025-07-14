@@ -1,17 +1,23 @@
 # lib/cadence_backend_web/router.ex
-
 defmodule CadenceBackendWeb.Router do
   use CadenceBackendWeb, :router
   import Phoenix.Router
 
-  pipeline :api do
-    plug :accepts, ["json"]
 
+  pipeline :api_public do
+    plug :accepts, ["json"]
     plug Plug.Parsers,
      parsers: [:urlencoded, :multipart, :json],
      pass: ["*/*"],
      json_decoder: Phoenix.json_library()
+  end
 
+  pipeline :api_protected do
+    plug :accepts, ["json"]
+    plug Plug.Parsers,
+     parsers: [:urlencoded, :multipart, :json],
+     pass: ["*/*"],
+     json_decoder: Phoenix.json_library()
     plug CadenceBackendWeb.JWTAuthPlug
     plug :put_current_user
   end
@@ -23,19 +29,23 @@ defmodule CadenceBackendWeb.Router do
 
   # --- NOVO BLOCO DE ROTA PARA O CAMINHO RAIZ (/) ---
   scope "/", CadenceBackendWeb do
-    pipe_through :api # Usa o mesmo pipeline de API para retornar JSON
-    get "/", ApiController, :status # <-- ADICIONE ESTA LINHA
+    pipe_through :api_public # Usa o pipeline público para retornar JSON
+    get "/", ApiController, :status
   end
   # --- FIM DO NOVO BLOCO ---
 
-  scope "/api", CadenceBackendWeb do
-    pipe_through :api
 
+  scope "/api", CadenceBackendWeb do
+    pipe_through :api_public
     post "/login", AuthController, :login
+    post "/register", AuthController, :register
+  end
+
+  scope "/api", CadenceBackendWeb do
+    pipe_through :api_protected
     get "/meetings", MeetingController, :index
     post "/meetings", MeetingController, :create
     get "/meetings/:id", MeetingController, :show
-
 
     # Endpoint para dados do usuário autenticado
     get "/me", ApiController, :me
@@ -62,5 +72,5 @@ defmodule CadenceBackendWeb.Router do
       conn
     end
   end
-  
+
 end
