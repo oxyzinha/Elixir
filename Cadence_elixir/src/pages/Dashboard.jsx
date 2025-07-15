@@ -15,6 +15,7 @@ import Header from '@/components/layout/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from "../lib/authContext";
 
 const Dashboard = () => {
   const { toast } = useToast();
@@ -46,6 +47,8 @@ const Dashboard = () => {
     toast({ title: "Visualizando documentos recentes...", duration: 1500 });
   };
 
+  const { user } = useAuth();
+
   return (
     <>
       <Helmet>
@@ -74,7 +77,7 @@ const Dashboard = () => {
                   className="text-5xl font-semibold tracking-wide leading-tight"
                   style={{ fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}
                 >
-                  Bem-vindo ao Painel de Saúde Cadence, João Silva
+                  Bem-vindo ao Painel de Saúde Cadence, {user?.name ?? 'Usuário'}
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, x: -25 }}

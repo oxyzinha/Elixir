@@ -52,7 +52,8 @@ defmodule CadenceBackend.MixProject do
       {:ecto, "~> 3.10"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_pubsub, "~> 2.1"},
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      {:httpoison, "~> 1.8"},
       # REMOVIDO: {:goth, "~> 1.4"} - Não estamos a usar Goth
     ]
   end

@@ -23,7 +23,10 @@ defmodule CadenceBackendWeb.AuthController do
           }
           case Firebase.create_document("users", user) do
             {:ok, created_user} ->
-              json(conn, %{user: Map.delete(created_user, :password), message: "Usuário registrado com sucesso"})
+              user_data = Map.delete(created_user, :password)
+              user_data = Map.put(user_data, "sub", user_data.id) # Adiciona o campo sub
+              {:ok, token, _claims} = Guardian.encode_and_sign(user_data)
+              json(conn, %{user: user_data, token: token, message: "Usuário registrado com sucesso"})
             {:error, reason} ->
               conn
               |> put_status(:internal_server_error)
@@ -47,10 +50,12 @@ defmodule CadenceBackendWeb.AuthController do
         cond do
           user ->
             user_data = Map.delete(user, :password)
+            user_data = Map.put(user_data, "sub", user.id) # Adiciona o campo sub
             {:ok, token, _claims} = Guardian.encode_and_sign(user_data)
             json(conn, %{token: token, user: user_data})
           username == "joao" and password == "1234" ->
             user = %{id: 1, name: "João Silva", email: "joao@cadence.com", role: "Admin"}
+            user = Map.put(user, "sub", user.id) # Adiciona o campo sub
             {:ok, token, _claims} = Guardian.encode_and_sign(user)
             json(conn, %{token: token, user: user})
           true ->

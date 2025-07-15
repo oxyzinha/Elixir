@@ -288,8 +288,48 @@ defmodule CadenceBackend.Firebase do
     # Chama a função pública firestore_fields_to_map/1
     Enum.map(documents, &firestore_fields_to_map/1)
   end
+
   defp decode_list_response(other) do
     IO.inspect(other, label: "FIREBASE DEBUG: decode_list_response - unexpected input, returning empty list")
     []
   end
+
+  def get_user_by_id(nil), do: {:error, :invalid_id}
+  def get_user_by_id(""), do: {:error, :invalid_id}
+  def get_user_by_id(user_id) do
+    url = "#{base_url()}/users/#{user_id}"
+
+    case HTTPoison.get(url, [], recv_timeout: 5_000) do
+      {:ok, %{status_code: 200, body: body}} ->
+        {:ok, decode_firestore_user(body)}
+
+      {:ok, %{status_code: 404}} ->
+        {:error, :not_found}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp decode_firestore_user(body) do
+    body
+    |> Jason.decode!()
+    |> parse_firestore_document()
+  end
+
+  defp parse_firestore_document(%{"fields" => fields, "name" => full_path}) do
+    id = String.split(full_path, "/") |> List.last()
+
+    %{
+      "id" => id,
+      "name" => get_firestore_string(fields["name"]),
+      "email" => get_firestore_string(fields["email"]),
+      "role" => get_firestore_string(fields["role"]),
+      "avatar_url" => get_firestore_string(fields["avatar_url"]),
+      "member_since" => get_firestore_string(fields["member_since"])
+    }
+  end
+
+  defp get_firestore_string(nil), do: nil
+  defp get_firestore_string(%{"stringValue" => value}), do: value
 end
