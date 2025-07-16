@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';   // Certifique-se de que este im
 import { useToast } from '@/components/ui/use-toast';
 import MeetingItem from '@/components/meetings/MeetingItem';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '@/services/api';
 
 const Meetings = () => {
   const { toast } = useToast();
@@ -36,16 +37,15 @@ const Meetings = () => {
     const fetchMeetings = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:4000/api/meetings', {
+        const data = await apiFetch('/api/meetings', {
           headers: {
-            'Authorization': `Bearer `, // Ajustado para token vazio para desenvolvimento
-            'Content-Type': 'application/json'
+    
           }
         });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
+        // if (!response.ok) {
+        //   throw new Error(`HTTP error! status: ${response.status}`);
+        // }
+        // const data = await response.json();
         const formattedMeetings = data.meetings.map(m => ({
           id: m.id,
           name: m.name,
@@ -96,11 +96,9 @@ const Meetings = () => {
       duration: 2000,
     });
     try {
-      const response = await fetch('http://localhost:4000/api/meetings', {
+      const newMeetingResponse = await apiFetch('/api/meetings', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer `, // Token vazio para desenvolvimento
         },
         body: JSON.stringify({
           meeting: {
@@ -111,13 +109,13 @@ const Meetings = () => {
           }
         }),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const newMeetingResponse = await response.json();
+      // if (!response.ok) {
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // }
+      // const newMeetingResponse = await response.json();
       const newMeeting = newMeetingResponse.meeting;
 
-      setMeetings(prev => [...prev, {
+      setMeetings(prev => [ {
         id: newMeeting.id,
         name: newMeeting.name,
         date: newMeeting.start_time,
@@ -125,7 +123,7 @@ const Meetings = () => {
         status: newMeeting.status,
         participants: newMeeting.participants || [],
         type: newMeeting.type || 'Geral'
-      }]);
+      },...prev]);
       toast({
         title: "Consulta agendada com sucesso!",
         duration: 3000,

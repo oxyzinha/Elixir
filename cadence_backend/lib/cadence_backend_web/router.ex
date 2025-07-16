@@ -54,6 +54,10 @@ defmodule CadenceBackendWeb.Router do
     # Endpoints de conversas
     get "/conversations", ConversationController, :index
     post "/conversations", ConversationController, :create
+
+    # Endpoint de notificações
+    get "/notifications", NotificationController, :index
+    post "/notifications", NotificationController, :create
   end
 
   if Application.compile_env(:cadence_backend, :dev_routes) do

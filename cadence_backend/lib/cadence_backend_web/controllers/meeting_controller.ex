@@ -31,6 +31,20 @@ defmodule CadenceBackendWeb.MeetingController do
   def create(conn, %{"meeting" => meeting_params}) do
     case Meetings.create_meeting(meeting_params) do
       {:ok, %Meeting{} = meeting} ->
+        # Notificar todos os participantes e o dono da reunião
+        participants = (meeting.participants || []) ++ [%{"id" => meeting.owner_id, "name" => meeting.name}]
+        Enum.each(participants, fn participant ->
+          CadenceBackend.Firebase.create_document("notifications", %{
+            user_id: participant["id"] || participant[:id],
+            type: "meeting",
+            title: meeting.name,
+            description: "Você foi convidado para uma reunião.",
+            context: meeting.name,
+            meeting_id: meeting.id,
+            timestamp: DateTime.utc_now() |> DateTime.to_iso8601(),
+            read: false
+          })
+        end)
         conn
         |> put_status(:created)
         |> json(%{meeting: meeting}) # <<< Tentar enviar a struct diretamente!

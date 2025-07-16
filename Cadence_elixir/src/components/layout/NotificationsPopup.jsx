@@ -1,74 +1,19 @@
 //src\components\layout\NotificationsPopup.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Calendar, FileText, CheckCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
-const notificationsData = [
-  {
-    id: 1,
-    type: 'message',
-    user: 'Ana Costa',
-    description: 'enviou uma nova mensagem',
-    context: 'Equipa Frontend',
-    timestamp: '2 min atrás',
-    read: false,
-  },
-  {
-    id: 2,
-    type: 'meeting',
-    user: 'Pedro Ramos',
-    description: 'convidou-o para a reunião',
-    context: 'Revisão do Sprint',
-    timestamp: '15 min atrás',
-    read: false,
-  },
-  {
-    id: 3,
-    type: 'file',
-    user: 'Maria Antunes',
-    description: 'atualizou o ficheiro',
-    context: 'Plano de Projeto.docx',
-    timestamp: '1 hora atrás',
-    read: true,
-  },
-  {
-    id: 4,
-    type: 'message',
-    user: 'Carlos Pereira',
-    description: 'mencionou-o em',
-    context: 'Canal #geral',
-    timestamp: 'Ontem',
-    read: false,
-  },
-  {
-    id: 5,
-    type: 'meeting',
-    user: 'Sofia Alves',
-    description: 'aceitou o seu convite para',
-    context: 'Brainstorming Cadence V2',
-    timestamp: '2 dias atrás',
-    read: true,
-  },
-];
-
+// Mapeamento de ícones por tipo de notificação
 const iconMap = {
   message: { icon: MessageSquare, color: 'var(--color-accent-blue)' },
   meeting: { icon: Calendar, color: 'var(--color-primary)' },
   file: { icon: FileText, color: 'var(--color-accent-green)' },
 };
 
-const NotificationItem = ({ notification }) => {
-  const { icon: Icon, color } = iconMap[notification.type];
-  const { toast } = useToast();
-
-  const handleNotificationClick = () => {
-    toast({
-      title: "Redirecionando para a notificação...",
-      description: "Esta funcionalidade ainda não está implementada.",
-      duration: 3000,
-    });
-  };
+// Componente para item individual de notificação
+const NotificationItem = ({ notification, onClick }) => {
+  const { icon: Icon, color } = iconMap[notification.type] || iconMap.message;
 
   return (
     <motion.div
@@ -77,7 +22,7 @@ const NotificationItem = ({ notification }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      onClick={handleNotificationClick}
+      onClick={() => onClick(notification)}
       className="flex items-start gap-4 p-3 transition-colors duration-200 rounded-lg cursor-pointer hover:bg-white/5"
     >
       <div className="relative mt-1">
@@ -90,7 +35,10 @@ const NotificationItem = ({ notification }) => {
       </div>
       <div className="flex-1">
         <p className="text-sm" style={{ color: 'var(--text-light-primary)' }}>
-          <span className="font-bold">{notification.user}</span> {notification.description} <span className="font-semibold" style={{ color }}>"{notification.context}"</span>.
+          <span className="font-bold">{notification.user}</span> {notification.description}{' '}
+          <span className="font-semibold" style={{ color }}>
+            "{notification.context}"
+          </span>.
         </p>
         <p className="text-xs mt-1" style={{ color: 'var(--text-light-secondary)' }}>
           {notification.timestamp}
@@ -101,14 +49,71 @@ const NotificationItem = ({ notification }) => {
   );
 };
 
+// Componente principal do popup de notificações
 const NotificationsPopup = ({ isVisible }) => {
   const { toast } = useToast();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleMarkAllAsRead = () => {
+  // Busca notificações do backend
+  useEffect(() => {
+    if (!isVisible) return;
+    setLoading(true);
+    setError(null);
+    fetch('/api/notifications', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}` // ajuste conforme seu auth
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Erro ao buscar notificações');
+        return res.json();
+      })
+      .then(data => {
+        setNotifications(data.notifications || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setNotifications([]);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [isVisible]);
+
+  // Handler para clicar em uma notificação
+  const handleNotificationClick = (notification) => {
     toast({
-      title: "🚧 Esta funcionalidade ainda não foi implementada....",
+      title: notification.title || 'Notificação',
+      description: notification.description || 'Sem detalhes.',
       duration: 3000,
     });
+    // Aqui você pode implementar navegação ou marcar como lida
+  };
+
+  // Handler para marcar todas como lidas (placeholder)
+  const handleMarkAllAsRead = () => {
+    setNotifications(notifications.map(notification => ({...notification, read: true})));
+    toast({
+      title: 'Todas as notificações marcadas como lidas.',
+      duration: 3000,
+    });
+  };
+
+  // Renderização condicional
+  const renderContent = () => {
+    if (loading) {
+      return <div className="p-4 text-center text-sm">Carregando...</div>;
+    }
+    if (error) {
+      return <div className="p-4 text-center text-sm text-red-500">{error}</div>;
+    }
+    if (notifications.length === 0) {
+      return <div className="p-4 text-center text-sm">Nenhuma notificação.</div>;
+    }
+    return notifications.map((notification) => (
+      <NotificationItem key={notification.id} notification={notification} onClick={handleNotificationClick} />
+    ));
   };
 
   return (
@@ -138,9 +143,7 @@ const NotificationsPopup = ({ isVisible }) => {
             </div>
           </div>
           <div className="max-h-96 overflow-y-auto p-2">
-            {notificationsData.map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} />
-            ))}
+            {renderContent()}
           </div>
         </motion.div>
       )}
