@@ -34,7 +34,7 @@ def me(conn, _params) do
       end
 
       # Cenário 2: Nenhum utilizador autenticado.
-      _ ->
+
         json(conn, anonymous_user_data())
     end
   end

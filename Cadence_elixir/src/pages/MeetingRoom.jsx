@@ -7,6 +7,7 @@ import MeetingHeader from '@/components/meeting/MeetingHeader';
 import ParticipantsPanel from '@/components/meeting/ParticipantsPanel';
 import ChatPanel from '@/components/meeting/ChatPanel';
 import MeetingControls from '@/components/meeting/MeetingControls';
+import { useAuth } from '@/lib/authContext';
 
 // IMPORTANTE: Importe o setupPhoenixSocket que você acabou de criar
 // AJUSTE O CAMINHO AQUI: use caminho relativo ou verifique seu alias Vite
@@ -16,6 +17,7 @@ const MeetingRoom = () => {
   const { id } = useParams(); // ID da reunião
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading } = useAuth();
 
   const [controls, setControls] = useState({
     mic: true,
@@ -41,8 +43,8 @@ const MeetingRoom = () => {
 
   // Mock para o ID do usuário local e o token - SUBSTITUA POR VALORES REAIS DA AUTENTICAÇÃO!
   // Use um ID mais dinâmico ou único para cada teste
-  const [localUserId] = useState(`user_${Math.random().toString(36).substring(7)}`);
-  const [authToken] = useState("your_actual_auth_token_here"); // Ou deixe vazio se não usar token ainda
+  const localUserId = user?.id || '';
+  const authToken = localStorage.getItem('auth_token') || '';
 
   // Função para obter acesso à câmera e microfone (usada por useCallback para evitar recriação desnecessária)
   const getMedia = useCallback(async () => {
@@ -251,6 +253,7 @@ const MeetingRoom = () => {
 
   // --- Efeito principal para o Setup do Phoenix Channel e Mídia ---
   useEffect(() => {
+    if (!user || !authToken) return;
     // 1. Inicializa o Phoenix Socket e Channel
     const socket = setupPhoenixSocket(localUserId, authToken);
     const channel = socket.channel(`meeting:${id}`, {});
@@ -397,7 +400,7 @@ const MeetingRoom = () => {
       // Se for por sala, remova o `phoenixSocketInstance` do `socket.js` e permita nova conexão.
       // Para este cenário, vamos assumir que o socket pode ser global.
     };
-  }, [id, localUserId, authToken, navigate, toast, getMedia, handleSignalingMessage, createPeerConnection, removePeerConnection]); // Dependências: id da reunião, localUserId, authToken, navigate, toast, e as funções de callback
+  }, [user, authToken, id, localUserId, navigate, toast, getMedia, handleSignalingMessage, createPeerConnection, removePeerConnection]); // Dependências: id da reunião, localUserId, authToken, navigate, toast, e as funções de callback
 
   // Efeito para ligar/desligar faixas de áudio/vídeo localmente
   useEffect(() => {
@@ -595,6 +598,10 @@ const MeetingRoom = () => {
             onTabClick={handleTabClick}
             localUserId={localUserId} // Passa o ID do usuário local
             remoteParticipants={remoteParticipants} // Passa os participantes remotos
+            meetingChannel={meetingChannelRef.current}
+            meetingId={id}
+            userId={localUserId}
+            onPresenceUpdate={setRemoteParticipants}
           />
           {/* Main Content Area - Onde os vídeos aparecerão */}
           <div className="flex-1 p-4 bg-gray-100 flex flex-wrap justify-center items-center gap-4 relative">
@@ -645,7 +652,11 @@ const MeetingRoom = () => {
             )}
           </div>
           {/* Passe as mensagens de chat e a função de envio para o ChatPanel */}
-          <ChatPanel activeTab={activeTab} chatMessages={chatMessages} onSendMessage={handleSendMessage} />
+          <ChatPanel
+            meetingChannel={meetingChannelRef.current}
+            currentUserId={localUserId}
+            currentUserName={`User ${localUserId}`}
+          />
         </div>
         <MeetingControls controls={controls} onToggle={handleControlToggle} onLeave={handleLeaveMeeting} />
       </div>

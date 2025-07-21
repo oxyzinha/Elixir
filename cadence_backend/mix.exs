@@ -37,8 +37,8 @@ defmodule CadenceBackend.MixProject do
       {:phoenix_live_view, "~> 0.20"},
       {:phoenix_live_dashboard, "~> 0.8.3"},
       {:phoenix_html, "~> 3.3"},
-      {:swoosh, "~> 1.5"},
-      {:finch, "~> 0.18"}, # Versão atualizada ou compatível
+      {:swoosh, "~> 1.12"},
+      {:finch, "~> 0.18"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.26"},
@@ -54,6 +54,7 @@ defmodule CadenceBackend.MixProject do
       {:phoenix_pubsub, "~> 2.1"},
       {:uuid, "~> 1.1"},
       {:httpoison, "~> 1.8"},
+      {:gen_smtp, "~> 1.1"}
       # REMOVIDO: {:goth, "~> 1.4"} - Não estamos a usar Goth
     ]
   end

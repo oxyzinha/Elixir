@@ -46,6 +46,8 @@ defmodule CadenceBackendWeb.Router do
     get "/meetings", MeetingController, :index
     post "/meetings", MeetingController, :create
     get "/meetings/:id", MeetingController, :show
+    get "/meetings/:id/chat", MeetingController, :get_chat_messages
+    delete "/meetings/:id/chat", MeetingController, :clear_chat
 
     # Endpoint para dados do usuário autenticado
     get "/me", ApiController, :me
@@ -58,6 +60,11 @@ defmodule CadenceBackendWeb.Router do
     # Endpoint de notificações
     get "/notifications", NotificationController, :index
     post "/notifications", NotificationController, :create
+  end
+
+  scope "/api", CadenceBackendWeb do
+    pipe_through :api_protected
+    post "/invite", InviteController, :invite
   end
 
   if Application.compile_env(:cadence_backend, :dev_routes) do

@@ -13,7 +13,7 @@ const ControlButton = ({ icon: Icon, offIcon: OffIcon, active, onClick, isDanger
   </motion.button>
 );
 
-const MeetingControls = ({ controls, onToggle, onLeave }) => {
+const MeetingControls = ({ controls, onToggle, onLeave, isScreenSharing, startScreenShare, stopScreenShare }) => {
   const controlButtons = [
     { id: 'mic', icon: Mic, offIcon: MicOff, active: controls.mic },
     { id: 'video', icon: Video, offIcon: VideoOff, active: controls.video },
@@ -40,6 +40,7 @@ const MeetingControls = ({ controls, onToggle, onLeave }) => {
             onClick={() => onToggle(btn.id)}
           />
         ))}
+        {/* Remover o botão de compartilhar tela (azul) */}
         <ControlButton
           icon={Phone}
           active={true}

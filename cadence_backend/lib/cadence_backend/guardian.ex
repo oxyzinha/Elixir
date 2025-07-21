@@ -10,9 +10,7 @@ defmodule CadenceBackend.Guardian do
 
   # Callback para recuperar o resource (usuário) a partir do subject do token
   def resource_from_claims(%{"sub" => id}) do
-    # Aqui você buscaria o usuário no banco de dados
-    # Exemplo simplificado:
-    user = %{id: id, name: "Usuário Exemplo"}
+    user = CadenceBackend.Accounts.get_user_by_id(id)
     {:ok, user}
   end
 end

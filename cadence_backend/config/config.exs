@@ -38,6 +38,17 @@ config :finch, name: CadenceBackend.Finch, pools: %{
   :default => [size: 20]
 }
 
+config :cadence_backend, CadenceBackend.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.gmail.com",
+  username: "seu-email@gmail.com",
+  password: "sua-senha-do-app",
+  port: 587,
+  ssl: false,
+  tls: :always,
+  auth: :always
+
+
 # Configuração global para Jason
 config :jason,
   library: Jason,
