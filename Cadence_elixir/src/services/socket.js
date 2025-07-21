@@ -1,4 +1,5 @@
 import { Socket } from "phoenix";
+import { Presence } from "phoenix";
 
 // Variável para armazenar a instância única do socket
 let phoenixSocketInstance = null;
@@ -71,5 +72,62 @@ const setupPhoenixSocket = (userId, token) => {
 
   return socket;
 };
+
+// Adicione esta função ao seu socket.js
+export function connectToUserChannel(userId, onNotification) {
+  console.log("Token enviado para o socket:", localStorage.getItem("auth_token"));
+  const socket = new Socket("ws://localhost:4000/socket", {
+    params: { token: localStorage.getItem("auth_token") }
+  });
+
+  socket.connect();
+
+  const channel = socket.channel(`user:${userId}`, {});
+
+  channel.on("new_notification", payload => {
+    onNotification(payload.notification);
+  });
+
+  channel.join()
+    .receive("ok", resp => { console.log("Conectado ao canal de notificações", resp); })
+    .receive("error", resp => { console.error("Erro ao conectar ao canal", resp); });
+
+  return channel;
+}
+
+// Função utilitária para gerenciar Presence em um canal
+export function setupPresence(channel, onUpdate) {
+  let presence = new Presence(channel);
+
+  function syncState(state) {
+    console.log("[PRESENCE] (setupPresence) state recebido:", state);
+    let list = [];
+    if (state && typeof state === 'object') {
+      list = Object.entries(state).map(([id, { metas }]) => ({
+        id,
+        name: metas && metas[0] && metas[0].name ? metas[0].name : id,
+      }));
+    }
+    console.log("[PRESENCE] (setupPresence) Array convertido:", list);
+    onUpdate(list, state);
+  }
+
+  presence.onSync(() => {
+    syncState(presence.state);
+  });
+
+  // Inicializa imediatamente
+  syncState(presence.state);
+
+  return presence;
+}
+
+// Converte o objeto de presenças em uma lista de participantes
+function presencesToList(presences) {
+  return Presence.list(presences, (id, { metas }) => ({
+    id,
+    name: metas[0].name
+  }));
+}
 
 export default setupPhoenixSocket;

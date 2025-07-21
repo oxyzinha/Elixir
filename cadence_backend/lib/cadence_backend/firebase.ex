@@ -10,7 +10,7 @@ defmodule CadenceBackend.Firebase do
   """
 
   require Logger
-  alias Finch.Build # Adicionei aqui, caso você não tivesse
+  # alias Finch.Build # Adicionei aqui, caso você não tivesse
   alias Jason # Adicionei aqui, caso você não tivesse
 
   # @project_id precisa ser configurado em config/config.exs ou env.

@@ -23,6 +23,10 @@ defmodule CadenceBackendWeb.NotificationController do
     # Espera receber no body: user_id, type, user, description, context, timestamp, read
     case Firebase.create_document("notifications", params) do
       {:ok, notification} ->
+        # Broadcast para o canal do usuário
+        user_id = notification["user_id"] || notification[:user_id]
+        CadenceBackendWeb.Endpoint.broadcast("user:#{user_id}", "new_notification", %{notification: notification})
+
         json(conn, %{notification: notification})
       {:error, reason} ->
         conn

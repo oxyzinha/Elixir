@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquare, Calendar, FileText, CheckCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { connectToUserChannel } from '@/services/socket';
+import { useAuth } from '@/lib/authContext'; // supondo que você tenha um contexto de auth
 
 // Mapeamento de ícones por tipo de notificação
 const iconMap = {
@@ -55,31 +57,20 @@ const NotificationsPopup = ({ isVisible }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuth(); // ou de onde você pega o userId
 
   // Busca notificações do backend
   useEffect(() => {
-    if (!isVisible) return;
-    setLoading(true);
-    setError(null);
-    fetch('/api/notifications', {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}` // ajuste conforme seu auth
-      }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Erro ao buscar notificações');
-        return res.json();
-      })
-      .then(data => {
-        setNotifications(data.notifications || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setNotifications([]);
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [isVisible]);
+    if (!user?.id) return;
+
+    const channel = connectToUserChannel(user.id, (notification) => {
+      setNotifications(prev => [notification, ...prev]);
+    });
+
+    return () => {
+      channel && channel.leave();
+    };
+  }, [user]);
 
   // Handler para clicar em uma notificação
   const handleNotificationClick = (notification) => {

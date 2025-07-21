@@ -3,6 +3,7 @@ defmodule CadenceBackendWeb.MeetingController do
 
   alias CadenceBackend.Meetings
   alias CadenceBackend.Meetings.Meeting
+  alias CadenceBackend.ChatManager
   require Logger
   # Não precisa mais de require DateTime e NaiveDateTime aqui, se Jason lidar com isso
   # require DateTime # << Pode remover
@@ -131,5 +132,35 @@ defmodule CadenceBackendWeb.MeetingController do
   #   Map.from_struct(meeting)
   #   |> Map.drop([:__struct__])
   # end
+
+  # DELETE /api/meetings/:id/chat
+  def clear_chat(conn, %{"id" => meeting_id}) do
+    try do
+      ChatManager.clear_messages(meeting_id)
+
+      conn
+      |> put_status(:ok)
+      |> json(%{message: "Chat da reunião limpo com sucesso"})
+    rescue
+      e ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Erro ao limpar chat", details: inspect(e)})
+    end
+  end
+
+  # GET /api/meetings/:id/chat
+  def get_chat_messages(conn, %{"id" => meeting_id}) do
+    try do
+      messages = ChatManager.get_messages(meeting_id, 50)
+
+      json(conn, %{messages: messages})
+    rescue
+      e ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: "Erro ao buscar mensagens", details: inspect(e)})
+    end
+  end
 
 end

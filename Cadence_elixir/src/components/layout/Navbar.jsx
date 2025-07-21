@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -10,13 +10,17 @@ import {
  ChevronDown,
  UserPlus,
  Code,
-  LayoutDashboard
+  LayoutDashboard,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { apiFetch } from '../../services/api';
 
 const Navbar = () => {
  const location = useLocation();
+ const [inviteModalOpen, setInviteModalOpen] = useState(false);
+ const [inviteEmail, setInviteEmail] = useState("");
  const { toast } = useToast();
 
  const navItems = [
@@ -39,23 +43,65 @@ const Navbar = () => {
       '/code',      
       '/profile'
     ]; 
-  if (!allowedPaths.includes(path)) {
-   e.preventDefault();
-   toast({
-    title: "🚧 Esta funcionalidade ainda não foi implementada....",
-    duration: 3000,
-   });
+    if (!allowedPaths.includes(path)) {
+    e.preventDefault();
+    toast({
+      title: "Esta funcionalidade está em desenvolvimento.",
+      duration: 3000,
+    });
   }
  };
 
- const handleInviteClick = () => {
-  toast({
-   title: "🚧 Esta funcionalidade ainda não foi implementada....",
-   duration: 3000,
-  });
- };
+  const handleInviteClick = () => {
+    setInviteModalOpen(true);
+  };
+
+  const handleInviteSend = async (e) => {
+    e.preventDefault();
+    if (!inviteEmail || !inviteEmail.includes('@')) {
+      toast({
+        title: "Por favor, insira um e-mail válido.",
+        duration: 3000,
+        variant: "destructive"
+      });
+      return;
+    }
+    try {
+      const token = localStorage.getItem('token') || '';
+      const response = await apiFetch('/api/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: inviteEmail })
+      });
+      if (response.ok) {
+        toast({
+          title: `Convite enviado para ${inviteEmail}!`,
+          duration: 3000,
+        });
+        setInviteModalOpen(false);
+        setInviteEmail("");
+      } else {
+        const data = await response.json();
+        toast({
+          title: data.error || "Erro ao enviar convite.",
+          duration: 3000,
+          variant: "destructive"
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Erro de conexão com o servidor.",
+        duration: 3000,
+        variant: "destructive"
+      });
+    }
+  };
 
  return (
+  <>
   <motion.nav
    initial={{ x: -300 }}
    animate={{ x: 0 }}
@@ -125,6 +171,35 @@ const Navbar = () => {
     </Button>
    </div>
   </motion.nav>
+  {/* Modal de convite */}
+  {inviteModalOpen && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-80 relative">
+        <button
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold"
+          onClick={() => setInviteModalOpen(false)}
+          aria-label="Fechar modal"
+          type="button"
+        >
+          <X size={24} />
+        </button>
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Convidar para Cadence</h2>
+        <form onSubmit={handleInviteSend}>
+          <input
+            type="email"
+            className="w-full border rounded px-3 py-2 mb-3 text-gray-800"
+            placeholder="E-mail do convidado"
+            value={inviteEmail}
+            onChange={e => setInviteEmail(e.target.value)}
+            required
+            autoFocus
+          />
+          <Button type="submit" className="w-full btn-primary">Enviar convite</Button>
+        </form>
+      </div>
+    </div>
+  )}
+  </>
  );
 };
 

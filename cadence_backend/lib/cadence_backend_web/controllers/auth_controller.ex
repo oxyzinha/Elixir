@@ -25,7 +25,8 @@ defmodule CadenceBackendWeb.AuthController do
             {:ok, created_user} ->
               user_data = Map.delete(created_user, :password)
               user_data = Map.put(user_data, "sub", user_data.id) # Adiciona o campo sub
-              {:ok, token, _claims} = Guardian.encode_and_sign(user_data)
+              claims = %{"name" => user_data["name"] || user_data[:name]}
+              {:ok, token, _claims} = Guardian.encode_and_sign(user_data, claims)
               json(conn, %{user: user_data, token: token, message: "Usuário registrado com sucesso"})
             {:error, reason} ->
               conn
@@ -51,12 +52,14 @@ defmodule CadenceBackendWeb.AuthController do
           user ->
             user_data = Map.delete(user, :password)
             user_data = Map.put(user_data, "sub", user.id) # Adiciona o campo sub
-            {:ok, token, _claims} = Guardian.encode_and_sign(user_data)
+            claims = %{"name" => user_data["name"] || user_data[:name]}
+            {:ok, token, _claims} = Guardian.encode_and_sign(user_data, claims)
             json(conn, %{token: token, user: user_data})
           username == "joao" and password == "1234" ->
             user = %{id: 1, name: "João Silva", email: "joao@cadence.com", role: "Admin"}
             user = Map.put(user, "sub", user.id) # Adiciona o campo sub
-            {:ok, token, _claims} = Guardian.encode_and_sign(user)
+            claims = %{"name" => user["name"] || user[:name]}
+            {:ok, token, _claims} = Guardian.encode_and_sign(user, claims)
             json(conn, %{token: token, user: user})
           true ->
             conn

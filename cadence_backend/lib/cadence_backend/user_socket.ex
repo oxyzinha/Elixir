@@ -7,6 +7,7 @@ defmodule CadenceBackendWeb.UserSocket do
   # Qualquer canal que usa este socket deve ser listado aqui.
   # Exemplo: canal "meeting:*" para todas as reuniões.
   channel "meeting:*", CadenceBackendWeb.MeetingChannel
+  channel "user:*", CadenceBackendWeb.UserChannel
 
   ## Disconnect
   # Função chamada quando o cliente WebSocket se desconecta.
@@ -21,29 +22,29 @@ defmodule CadenceBackendWeb.UserSocket do
   # `params`: Contém os parâmetros da query string da URL do WebSocket (ex: user_id, token).
   # `socket`: O objeto Plug.Conn para o handshake do WebSocket.
   # `connect_info`: Informações adicionais configuradas no Endpoint.
-  def connect(params, socket, connect_info) do
-    # Debugging: Imprima os parâmetros e as informações de conexão para ver o que está a chegar.
-    IO.inspect({:socket_connect_params, params}, label: "DEBUG SOCKET CONNECT - Params Recebidos")
-    IO.inspect({:socket_connect_info, connect_info}, label: "DEBUG SOCKET CONNECT - Info Recebida")
-
-    # MOCK PARA TESTES:
-    # Em um ambiente de produção, esta seria sua lógica de autenticação real e segura.
-    # Por exemplo, você validaria o 'token' e buscaria o usuário no seu banco de dados.
-    # Se a autenticação falhar, você retornaria `{:error, reason}`.
-
-    # Pega o user_id dos parâmetros da query string, ou um valor padrão se não estiver presente.
-    mock_user_id = Map.get(params, "user_id", "mock_user_default")
-    mock_user_name = "Utilizador #{mock_user_id}" # Gera um nome para o usuário mockado
-
-    # Atribui o `current_user` e `user_id` ao `socket.assigns`.
-    # Estes assigns estarão disponíveis em todos os handlers do canal (`handle_in`, `join`, etc.).
-    new_socket = assign(socket, :current_user, %{id: mock_user_id, name: mock_user_name})
-    new_socket = assign(new_socket, :user_id, mock_user_id) # Para uso em `id/1`
-
-    # Debugging: Confirma que a conexão foi "autenticada" (mock) e retorna o novo socket.
-    IO.inspect({:socket_connect_result, :ok_authenticated_mock}, label: "DEBUG SOCKET CONNECT - Resultado")
-    {:ok, new_socket}
+  def connect(%{"token" => token} = _params, socket, _connect_info) do
+    IO.inspect(token, label: "TOKEN RECEBIDO NO SOCKET")
+    case CadenceBackend.Guardian.decode_and_verify(token) do
+      {:ok, claims} ->
+        # Aqui você pode buscar o usuário real do banco, mas Guardian já retorna um user mock
+        # Se você tiver um Accounts.get_user_by_id/1, use:
+        # {:ok, user} = CadenceBackend.Accounts.get_user_by_id(claims["sub"])
+        # Para agora, use o resource_from_claims do Guardian:
+        case CadenceBackend.Guardian.resource_from_claims(claims) do
+          {:ok, user} ->
+            socket = assign(socket, :current_user, %{id: user.id, name: user.name})
+            socket = assign(socket, :user_id, user.id)
+            {:ok, socket}
+          _ ->
+            :error
+        end
+      _ ->
+        :error
+    end
   end
+
+  # Fallback para conexões sem token (opcional, pode remover se quiser obrigar autenticação)
+  def connect(_params, _socket, _connect_info), do: :error
 
   @impl true
   # A função `id/1` é usada para identificar o socket de forma única.

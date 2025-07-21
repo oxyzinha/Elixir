@@ -61,9 +61,6 @@ defmodule CadenceBackendWeb.Endpoint do
     ],
     longpoll: [connect_info: [session: @session_options, user_id: :user_id, token: :token]]
 
- socket "/socket", CadenceBackendWeb.UserSocket,
-    websocket: true,
-    longpoll: false
 
   # Configuração para o Phoenix LiveView (se você estiver usando LiveView)
   # Mantenha se você usa LiveView, caso contrário, pode remover este bloco.

@@ -26,7 +26,10 @@ defmodule CadenceBackend.Application do
 
       # Inicie o rastreador de Presença do Phoenix.
       # Ele usa o PubSub para gerenciar o estado online/offline dos usuários em canais.
-      CadenceBackend.PresenceTracker
+      CadenceBackend.PresenceTracker,
+
+      # Inicie o gerenciador de chat em tempo real.
+      CadenceBackend.ChatManager
     ]
 
     # Opções do supervisor: :one_for_one significa que se um processo falhar, só ele é reiniciado.
