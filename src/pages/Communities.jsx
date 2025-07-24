@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { Search, Stethoscope, PlusCircle, Users, Image as ImageIcon } from 'lucide-react'; // Removido Clock
+import { Search, Stethoscope, PlusCircle, Users, Image as ImageIcon } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import CommunityCard from '@/components/communities/CommunityCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 
-// Importar as novas funções de serviço
 import { fetchAllCommunities, fetchUserJoinedCommunities, joinCommunity, createCommunity } from '@/services/communities';
 
 const Communities = () => {
@@ -29,10 +28,8 @@ const Communities = () => {
   const [sortOrder, setSortOrder] = useState('recent');
   const [filterType, setFilterType] = useState('all');
 
-  // Ref para a secção de exploração
   const exploreSectionRef = useRef(null);
 
-  // Efeito para carregar as comunidades quando o componente montar
   useEffect(() => {
     const loadCommunities = async () => {
       setIsLoading(true);
@@ -55,7 +52,6 @@ const Communities = () => {
     loadCommunities();
   }, []);
 
-  // Filtrar e Ordenar as comunidades para exploração
   const exploreCommunities = allCommunities
     .filter(entity =>
       !entity.isJoined && (
@@ -158,9 +154,11 @@ const Communities = () => {
       </Helmet>
       <div className="flex min-h-screen">
         <Navbar />
-        <div className="flex-1">
+        {/* Adicionado ml-0 para telas pequenas e ml-64 para telas médias e maiores */}
+        <div className="flex-1 flex flex-col ml-0 md:ml-64">
           <Header />
-          <main className="pt-24 p-8" style={{ marginLeft: '16rem', flexGrow: 1, overflowY: 'auto' }}>
+          {/* Removido o style fixo do main. O ml-0 md:ml-64 do pai já faz o trabalho */}
+          <main className="pt-24 p-4 md:p-8 flex-1 overflow-y-auto"> {/* Ajustado padding */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -168,12 +166,13 @@ const Communities = () => {
               className="max-w-7xl mx-auto"
             >
               {/* Título Principal e Botões de Ação */}
-              <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+              {/* flex-col em telas pequenas, flex-row em telas médias, justify-between */}
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4"> {/* Ajustado items-start */}
                 <motion.h1
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.2, duration: 0.6 }}
-                  className="text-3xl font-bold"
+                  className="text-2xl sm:text-3xl font-bold text-center md:text-left w-full md:w-auto" // Ajustado tamanho e alinhamento
                   style={{ color: 'var(--text-light-primary)' }}
                 >
                   Comunidades e Grupos de Suporte
@@ -182,13 +181,13 @@ const Communities = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4, duration: 0.6 }}
-                  className="flex items-center gap-4"
+                  className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto" // Empilha botões em telas menores
                 >
-                  <Button onClick={() => setIsCreateCommunityModalOpen(true)} className="btn-secondary flex items-center gap-2">
+                  <Button onClick={() => setIsCreateCommunityModalOpen(true)} className="btn-secondary flex items-center gap-2 w-full sm:w-auto">
                     <PlusCircle size={18} />
                     Criar Nova Comunidade
                   </Button>
-                  <Button onClick={handleExploreSpecialties} className="btn-primary flex items-center gap-2">
+                  <Button onClick={handleExploreSpecialties} className="btn-primary flex items-center gap-2 w-full sm:w-auto">
                     <Stethoscope size={18} />
                     Explorar Especialidades
                   </Button>
@@ -197,7 +196,7 @@ const Communities = () => {
 
               {/* Seção 1: As Minhas Comunidades */}
               <div className="mb-12">
-                <h2 className="text-2xl font-semibold mb-6" style={{ color: 'var(--text-light-primary)' }}>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-6" style={{ color: 'var(--text-light-primary)' }}> {/* Ajustado tamanho do título */}
                   As Minhas Comunidades
                   <Users className="inline-block ml-2 text-blue-500" size={24} />
                 </h2>
@@ -210,7 +209,7 @@ const Communities = () => {
                     variants={{
                       visible: { transition: { staggerChildren: 0.1 } },
                     }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8" // Ajustado gap
                   >
                     {myCommunities.map((entity) => (
                       <CommunityCard key={entity.id} community={entity} onJoin={() => { /* Botão "Ver Chat" ou "Aceder" aqui */ }} />
@@ -228,11 +227,12 @@ const Communities = () => {
               {/* Seção 2: Explorar Novas Comunidades - Com a ref para scroll */}
               <div ref={exploreSectionRef}>
                 {/* O container dos filtros e pesquisa com fundo, borda e sombra */}
+                {/* flex-col em telas pequenas, flex-row em telas médias. Adicionado mb-4 em telas pequenas para h2 */}
                 <div
-                  className="p-6 rounded-xl shadow-md border mb-8 flex flex-col md:flex-row items-center justify-between gap-4"
+                  className="p-4 md:p-6 rounded-xl shadow-md border mb-8 flex flex-col md:flex-row items-center justify-between gap-4" /* Ajustado padding */
                   style={{ backgroundColor: 'var(--bg-light-primary)', borderColor: 'var(--border-color)' }}
                 >
-                  <h2 className="text-2xl font-semibold md:hidden" style={{ color: 'var(--text-light-primary)' }}>
+                  <h2 className="text-xl sm:text-2xl font-semibold md:hidden mb-4 md:mb-0" style={{ color: 'var(--text-light-primary)' }}> {/* Ajustado tamanho e margem */}
                     Explorar Novas Comunidades
                   </h2>
                   <div className="relative w-full md:w-72">
@@ -250,19 +250,20 @@ const Communities = () => {
                     />
                   </div>
                   {/* Botões de Filtro e Ordenação - Estilo "pílula" */}
-                  <div className="flex items-center gap-2 flex-wrap justify-center md:justify-start">
+                  {/* flex-wrap em telas pequenas para quebrar linha. Adicionado mt-2 md:mt-0 para espaçamento */}
+                  <div className="flex items-center gap-2 flex-wrap justify-center md:justify-start mt-4 md:mt-0 w-full md:w-auto"> {/* Ajustado margem e largura */}
                     <span className="text-sm font-medium mr-2" style={{ color: 'var(--text-light-secondary)' }}>Ordenar por:</span>
                     <Button
                       variant="ghost"
                       onClick={() => setSortOrder('recent')}
-                      className={`px-5 py-2 rounded-full font-medium text-sm transition ${sortOrder === 'recent' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`}
+                      className={`px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm transition ${sortOrder === 'recent' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`} // Ajustado padding e tamanho da fonte
                     >
                       Mais Recente
                     </Button>
                     <Button
                       variant="ghost"
                       onClick={() => setSortOrder('members')}
-                      className={`px-5 py-2 rounded-full font-medium text-sm transition ${sortOrder === 'members' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`}
+                      className={`px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm transition ${sortOrder === 'members' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`} // Ajustado padding e tamanho da fonte
                     >
                       Mais Pessoas
                     </Button>
@@ -271,21 +272,21 @@ const Communities = () => {
                     <Button
                       variant="ghost"
                       onClick={() => setFilterType('all')}
-                      className={`px-5 py-2 rounded-full font-medium text-sm transition ${filterType === 'all' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`}
+                      className={`px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm transition ${filterType === 'all' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`} // Ajustado padding e tamanho da fonte
                     >
                       Todas
                     </Button>
                     <Button
                       variant="ghost"
                       onClick={() => setFilterType('clinic')}
-                      className={`px-5 py-2 rounded-full font-medium text-sm transition ${filterType === 'clinic' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`}
+                      className={`px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm transition ${filterType === 'clinic' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`} // Ajustado padding e tamanho da fonte
                     >
                       Clínicas
                     </Button>
                     <Button
                       variant="ghost"
                       onClick={() => setFilterType('support')}
-                      className={`px-5 py-2 rounded-full font-medium text-sm transition ${filterType === 'support' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`}
+                      className={`px-4 py-1.5 rounded-full font-medium text-xs sm:text-sm transition ${filterType === 'support' ? 'bg-[var(--color-primary)] text-white' : 'bg-[rgba(123,63,188,0.1)] text-[var(--color-primary)] hover:bg-[rgba(123,63,188,0.2)]'}`} // Ajustado padding e tamanho da fonte
                     >
                       Grupos de Suporte
                     </Button>
@@ -301,7 +302,7 @@ const Communities = () => {
                     variants={{
                       visible: { transition: { staggerChildren: 0.1 } },
                     }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8" // Ajustado gap
                   >
                     {exploreCommunities.map((entity) => (
                       <CommunityCard key={entity.id} community={entity} onJoin={() => handleJoinCommunity(entity.id)} />
@@ -320,12 +321,12 @@ const Communities = () => {
 
       {/* Modal para Criar Nova Comunidade com o novo estilo */}
       {isCreateCommunityModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"> {/* Adicionado p-4 para padding em telas pequenas */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="p-8 rounded-lg shadow-xl w-full max-w-md"
+            className="p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-md my-8" /* Ajustado padding e adicionado my-8 para centralizar verticalmente em telas menores */
             style={{
               backgroundColor: 'var(--bg-light-primary)',
               borderColor: 'var(--border-color)',
@@ -333,8 +334,8 @@ const Communities = () => {
               borderWidth: '1px',
             }}
           >
-            <h2 className="text-2xl font-bold mb-6" style={{ color: 'var(--text-light-primary)' }}>Criar Nova Comunidade</h2>
-            <p className="text-sm text-gray-500 mb-6">Preencha os detalhes para criar o seu próprio grupo de apoio ou discussão.</p>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: 'var(--text-light-primary)' }}>Criar Nova Comunidade</h2> {/* Ajustado tamanho */}
+            <p className="text-sm text-gray-500 mb-4 sm:mb-6">Preencha os detalhes para criar o seu próprio grupo de apoio ou discussão.</p> {/* Ajustado margem */}
             <form onSubmit={handleCreateNewCommunity}>
               <div className="mb-4">
                 <label htmlFor="newCommunityName" className="block text-sm font-bold mb-2" style={{ color: 'var(--text-light-primary)' }}>Nome da Comunidade</label>
@@ -373,7 +374,6 @@ const Communities = () => {
                 ></textarea>
               </div>
 
-              {/* Input para Imagem (opcional) - Mantém o estilo do input original com o ícone */}
               <div className="mb-4">
                 <label htmlFor="community-image-upload" className="block text-sm font-bold mb-2" style={{ color: 'var(--text-light-primary)' }}>
                   Imagem da Comunidade (Opcional)
@@ -402,7 +402,6 @@ const Communities = () => {
                 </div>
               </div>
 
-              {/* Seleção de Tipo de Comunidade - Adicionado Label */}
               <div className="mb-6">
                 <label className="block text-sm font-bold mb-2" style={{ color: 'var(--text-light-primary)' }}>Tipo de Comunidade</label>
                 <DropdownMenu>
@@ -445,11 +444,11 @@ const Communities = () => {
                 </DropdownMenu>
               </div>
 
-              <div className="flex items-center justify-between mt-6">
-                <Button type="button" onClick={() => setIsCreateCommunityModalOpen(false)} className="btn-secondary px-6 py-3 rounded-xl">
+              <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4"> {/* Ajustado para empilhar botões */}
+                <Button type="button" onClick={() => setIsCreateCommunityModalOpen(false)} className="btn-secondary px-6 py-3 rounded-xl w-full sm:w-auto">
                   Cancelar
                 </Button>
-                <Button type="submit" className="btn-primary px-6 py-3 rounded-xl">
+                <Button type="submit" className="btn-primary px-6 py-3 rounded-xl w-full sm:w-auto">
                   Criar Comunidade
                 </Button>
               </div>
